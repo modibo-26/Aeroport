@@ -27,7 +27,6 @@ public class Reservation {
         private LocalDateTime dateReservation;
         @Enumerated(EnumType.STRING)
         private Statut statut;
-
         @Column(nullable = false)
         private int nombrePlaces;
 

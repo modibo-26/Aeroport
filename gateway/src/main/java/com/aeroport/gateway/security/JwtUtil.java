@@ -1,31 +1,17 @@
-package com.aeroport.auth.security;
+package com.aeroport.gateway.security;
 
-import com.aeroport.auth.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
 
 @Component
 public class JwtUtil {
+
     private final String SECRET = "ma-cle-secrete-super-longue-pour-jwt-aeroport-2024-minimum-32-caracteres";
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
-    private final long EXPIRATION = 86400000; // 24h
-
-    public String generateToken(Long userId, String email, Role role) {
-        return Jwts.builder()
-                .setSubject(userId.toString())
-                .claim("email", email)
-                .claim("role", role.name())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(key)
-                .compact();
-    }
 
     public Claims extractClaims(String token) {
         return Jwts.parserBuilder()
@@ -42,5 +28,9 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public String getRole(String token) {
+        return extractClaims(token).get("role", String.class);
     }
 }

@@ -35,7 +35,7 @@ public class AuthService {
         user = repository.save(user);
 
         String token = jwt.generateToken(user.getId(), user.getEmail(), user.getRole());
-        return new AuthResponse(token, user.getEmail(), user.getRole());
+        return new AuthResponse(null, user.getEmail(), user.getRole());
     }
 
     public AuthResponse login(LoginRequest request) {
