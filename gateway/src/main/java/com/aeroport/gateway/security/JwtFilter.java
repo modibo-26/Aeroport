@@ -22,8 +22,9 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String path = request.getRequestURI();
+        String method = request.getMethod();
 
-        if(path.startsWith("/auth/")) {
+        if(isPublic(path, method)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -40,6 +41,28 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (isAdmin(path, method) && !service.getRole(token).equals("ADMIN")) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         filterChain.doFilter(request, response);
+    }
+
+    private Boolean isPublic(String path, String method) {
+        return path.startsWith("/auth/") || path.startsWith("/vols") && method.equals("GET");
+    }
+
+    private Boolean isAdmin(String path, String method) {
+        if (path.startsWith("/vols")) {
+            return true;
+        }
+        if(path.startsWith("/reservations/vol/"))  {
+            return true;
+        }
+        if (path.startsWith("/notifications") && method.equals("POST")) {
+            return true;
+        }
+        return path.startsWith("/notifications/vol/");
     }
 }

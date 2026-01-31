@@ -9,7 +9,6 @@ import java.util.List;
 
 @FeignClient(name = "SERVICE-RESERVATIONS")
 public interface ReservationClient {
-
     @GetMapping("/reservations/vol/{volId}")
     List<ReservationDTO> getReservation(@PathVariable Long volId);
 }
