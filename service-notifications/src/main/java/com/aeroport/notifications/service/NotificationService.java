@@ -23,7 +23,7 @@ public class NotificationService implements INotificationService {
 
     @Override
     public List<Notification> findByPassagerId(Long passagerId) {
-        return repository.findByPassagerId(passagerId);
+        return repository.findByPassagerIdOrderByDateCreationDesc(passagerId);
     }
 
     @Override

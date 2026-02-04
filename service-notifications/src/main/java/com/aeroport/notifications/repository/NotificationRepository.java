@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByPassagerId(Long passagerId);
+    List<Notification> findByPassagerIdOrderByDateCreationDesc(Long passagerId);
     List<Notification> findByVolId(Long volId);
 
 }
