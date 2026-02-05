@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -20,7 +21,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+//        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
+//        String origin = request.getHeader("Origin");
+//        if (origin != null) {
+//            List<String> allowedOrigins = List.of("http://localhost:3000", "http://localhost:5173");
+//
+//            if (allowedOrigins.contains(origin)) {
+//                response.setHeader("Access-Control-Allow-Origin", origin);
+//            }
+//        }
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "*");
 

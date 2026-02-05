@@ -80,4 +80,11 @@ public class VolService implements IVolService {
     public List<Vol> findByDestination(String destination) {
         return repository.findByDestination(destination);
     }
+
+    @Override
+    public Vol updatePlaces(Long id, int places) {
+        Vol vol = findById(id);
+        vol.setPlacesDisponibles(vol.getPlacesDisponibles() + places);
+        return repository.save(vol);
+    }
 }

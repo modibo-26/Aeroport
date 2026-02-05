@@ -33,6 +33,8 @@ public class ReservationService implements IReservationService {
 
         Reservation saved = repository.save(reservation);
 
+        volClient.removePlaces(reservation.getVolId(), reservation.getNombrePlaces());
+
         kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "CRÉATION", "Réservation créé"));
 
         return saved;
@@ -48,6 +50,8 @@ public class ReservationService implements IReservationService {
         Reservation reservation = findById(id);
         reservation.setStatut(Statut.ANNULEE);
         Reservation saved = repository.save(reservation);
+
+        volClient.addPlaces(reservation.getVolId(), reservation.getNombrePlaces());
 
         kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "ANNULATION", "Réservation annulée"));
 

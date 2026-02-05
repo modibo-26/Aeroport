@@ -14,6 +14,7 @@ public interface IVolService {
     int placeDisponible(Long id);
     Vol updateStatut(Long id, Statut statut);
     List<Vol> findByDestination(String destination);
+    Vol updatePlaces(Long id, int places);
 
 
 }

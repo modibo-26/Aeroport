@@ -54,6 +54,16 @@ public class VolController {
         return service.findByDestination(destination);
     }
 
+    @PutMapping("/{id}/add/{places}")
+    public Vol addPlaces(@PathVariable Long id, @PathVariable int places) {
+        return service.updatePlaces(id, places);
+    }
+
+    @PutMapping("/{id}/remove/{places}")
+    public Vol removePlaces(@PathVariable Long id, @PathVariable int places) {
+        return service.updatePlaces(id, -places);
+    }
+
 
 
 
