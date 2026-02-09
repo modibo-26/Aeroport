@@ -181,6 +181,11 @@ services:
     networks:
       - aeroport-network
 
+  frontend:
+    image: moboks/aeroport-frontend:v1
+    ports:
+      - "3000:80"
+
 # ============================================
 #              VOLUMES & NETWORKS
 # ============================================
