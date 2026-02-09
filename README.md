@@ -36,8 +36,51 @@ Système de gestion aéroportuaire basé sur une architecture microservices Spri
 - **Spring Security** + **JWT** (dans service-auth et Gateway)
 - **PostgreSQL 15** (une base par microservice)
 - **Apache Kafka** (communication asynchrone)
-- **Docker Compose** (infrastructure)
+- **Docker Compose** (infrastructure + services)
 - **Lombok** + **Maven**
+
+---
+
+## Lancement rapide
+
+### Prérequis
+
+- Docker + Docker Compose
+
+### Option 1 : Images Docker Hub (recommandé)
+
+Aucun build nécessaire, les images sont téléchargées automatiquement :
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Option 2 : Build local (développement)
+
+```bash
+docker-compose up -d --build
+```
+
+### Vérification
+
+- Eureka Dashboard : http://localhost:8761
+- API Gateway : http://localhost:8080
+- Tous les services doivent être enregistrés (5 services)
+
+---
+
+## Docker Hub
+
+Les images sont disponibles publiquement :
+
+| Service | Image |
+|---------|-------|
+| Eureka | `moboks/aeroport-eureka:v1` |
+| Gateway | `moboks/aeroport-gateway:v1` |
+| Auth | `moboks/aeroport-service-auth:v1` |
+| Vols | `moboks/aeroport-service-vols:v1` |
+| Reservations | `moboks/aeroport-service-reservations:v1` |
+| Notifications | `moboks/aeroport-service-notifications:v1` |
 
 ---
 
@@ -125,7 +168,7 @@ Gestion des réservations avec vérification des places disponibles via Feign.
 
 **Communication :**
 - **Feign Client** vers SERVICE-VOLS pour vérifier les places disponibles avant réservation
-- **Feign Client** vers SERVICE-VOLS pour incrémenter/décrémenter les places lors de la confirmation/annulation
+- **Feign Client** vers SERVICE-VOLS pour incrémenter/décrémenter places lors de la confirmation/annulation
 - **Kafka Producer** : Publie sur `reservation-events` lors de la création, confirmation et annulation
 - **Kafka Consumer** : Écoute `vol-events` pour annuler automatiquement les réservations si un vol est annulé
 
@@ -202,43 +245,7 @@ Les services métier ne valident pas le JWT — ils font confiance au Gateway.
 
 ---
 
-## Infrastructure Docker
-
-```yaml
-# docker-compose.yml
-services:
-  postgres-auth:        # port 5431 → auth_db
-  postgres-vols:        # port 5432 → vols_db
-  postgres-reservations: # port 5433 → reservations_db
-  postgres-notifications: # port 5434 → notifications_db
-  kafka:                # port 9092 (KRaft, sans Zookeeper)
-```
-
----
-
-## Lancement
-
-### 1. Infrastructure
-
-```bash
-docker-compose up -d
-```
-
-### 2. Services (dans l'ordre)
-
-1. **eureka-server** (attendre que le dashboard soit accessible sur http://localhost:8761)
-2. **api-gateway**
-3. **service-auth**
-4. **service-vols**
-5. **service-reservations**
-6. **service-notifications**
-
-### 3. Vérification
-
-- Eureka Dashboard : http://localhost:8761
-- Tous les services doivent être enregistrés (5 services)
-
-### 4. Test rapide
+## Test rapide
 
 ```bash
 # Register
@@ -263,13 +270,10 @@ curl -X POST http://localhost:8080/vols \
 
 ---
 
-## Frontends
+## Frontend
 
-Le backend est consommé par deux frontends :
+Le backend est consommé par un frontend React :
 
-| Framework | Répertoire | Port | UI Library |
-|-----------|-----------|------|------------|
-| React | `aeroport-react/` | 3000 | Material UI |
-| Vue 3 | `aeroport-vue/` | 5173 | Vuetify |
-
-Les deux utilisent la même API via le Gateway (`http://localhost:8080`).
+| Framework | Repo | Port | UI Library | Docker Hub |
+|-----------|------|------|------------|------------|
+| React | [Aeroport-Front](https://github.com/modibo-26/Aeroport-Front) | 3000 | Material UI | `moboks/aeroport-frontend:v1` |
