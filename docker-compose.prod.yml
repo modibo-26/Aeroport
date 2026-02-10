@@ -5,6 +5,7 @@ services:
 
   postgres-auth:
     image: postgres:15
+    mem_limit: 64m
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: admin
@@ -18,6 +19,7 @@ services:
 
   postgres-vols:
     image: postgres:15
+    mem_limit: 64m
     environment:
       POSTGRES_DB: vols_db
       POSTGRES_USER: admin
@@ -31,6 +33,7 @@ services:
 
   postgres-reservations:
     image: postgres:15
+    mem_limit: 64m
     environment:
       POSTGRES_DB: reservations_db
       POSTGRES_USER: admin
@@ -44,6 +47,7 @@ services:
 
   postgres-notifications:
     image: postgres:15
+    mem_limit: 64m
     environment:
       POSTGRES_DB: notifications_db
       POSTGRES_USER: admin
@@ -57,6 +61,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
+    mem_limit: 256m
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
@@ -67,6 +72,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+      KAFKA_HEAP_OPTS: "-Xmx128m -Xms64m"
     ports:
       - "9092:9092"
     volumes:
@@ -81,6 +87,9 @@ services:
 
   eureka:
     image: moboks/aeroport-eureka:v1
+    mem_limit: 256m
+    environment:
+      JAVA_OPTS: "-Xmx128m -Xms64m"
     ports:
       - "8761:8761"
     networks:
@@ -94,10 +103,12 @@ services:
 
   gateway:
     image: moboks/aeroport-gateway:v1
+    mem_limit: 256m
+    environment:
+      JAVA_OPTS: "-Xmx128m -Xms64m"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
     ports:
       - "8080:8080"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
     depends_on:
       eureka:
         condition: service_healthy
@@ -106,13 +117,15 @@ services:
 
   service-auth:
     image: moboks/aeroport-service-auth:v1
-    ports:
-      - "8081:8081"
+    mem_limit: 256m
     environment:
+      JAVA_OPTS: "-Xmx128m -Xms64m"
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8081:8081"
     depends_on:
       eureka:
         condition: service_healthy
@@ -123,14 +136,16 @@ services:
 
   service-vols:
     image: moboks/aeroport-service-vols:v1
-    ports:
-      - "8082:8082"
+    mem_limit: 256m
     environment:
+      JAVA_OPTS: "-Xmx128m -Xms64m"
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-vols:5432/vols_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8082:8082"
     depends_on:
       eureka:
         condition: service_healthy
@@ -143,14 +158,16 @@ services:
 
   service-reservations:
     image: moboks/aeroport-service-reservations:v1
-    ports:
-      - "8083:8083"
+    mem_limit: 256m
     environment:
+      JAVA_OPTS: "-Xmx128m -Xms64m"
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-reservations:5432/reservations_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8083:8083"
     depends_on:
       eureka:
         condition: service_healthy
@@ -163,14 +180,16 @@ services:
 
   service-notifications:
     image: moboks/aeroport-service-notifications:v1
-    ports:
-      - "8084:8084"
+    mem_limit: 256m
     environment:
+      JAVA_OPTS: "-Xmx128m -Xms64m"
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/notifications_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    ports:
+      - "8084:8084"
     depends_on:
       eureka:
         condition: service_healthy
@@ -183,6 +202,7 @@ services:
 
   frontend:
     image: moboks/aeroport-frontend:v1
+    mem_limit: 64m
     ports:
       - "3000:80"
 
