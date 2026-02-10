@@ -61,7 +61,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
-    mem_limit: 256m
+    mem_limit: 384m
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
@@ -72,7 +72,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
-      KAFKA_HEAP_OPTS: "-Xmx128m -Xms64m"
+      KAFKA_HEAP_OPTS: "-Xmx192m -Xms128m"
     ports:
       - "9092:9092"
     volumes:
