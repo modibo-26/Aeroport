@@ -4,7 +4,7 @@ pipeline {
         githubPush()
     }
     environment {
-        AWS_IP = '51.20.69.79'
+        AWS_IP = '16.171.235.81'
     }
     stages {
         stage('Clone') {
