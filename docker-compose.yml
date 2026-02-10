@@ -3,7 +3,7 @@ services:
   #              INFRASTRUCTURE
   # ============================================
 
-    postgres-auth:
+  postgres-auth:
     image: postgres:15
     environment:
       POSTGRES_DB: auth_db
@@ -16,176 +16,176 @@ services:
     networks:
       - aeroport-network
 
-    postgres-vols:
-      image: postgres:15
-      environment:
-        POSTGRES_DB: vols_db
-        POSTGRES_USER: admin
-        POSTGRES_PASSWORD: admin
-      ports:
-        - "5432:5432"
-      volumes:
-        - postgres-vols-data:/var/lib/postgresql/data
-      networks:
-        - aeroport-network
+  postgres-vols:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: vols_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-vols-data:/var/lib/postgresql/data
+    networks:
+      - aeroport-network
 
-    postgres-reservations:
-      image: postgres:15
-      environment:
-        POSTGRES_DB: reservations_db
-        POSTGRES_USER: admin
-        POSTGRES_PASSWORD: admin
-      ports:
-        - "5433:5432"
-      volumes:
-        - postgres-reservations-data:/var/lib/postgresql/data
-      networks:
-        - aeroport-network
+  postgres-reservations:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: reservations_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-reservations-data:/var/lib/postgresql/data
+    networks:
+      - aeroport-network
 
-    postgres-notifications:
-      image: postgres:15
-      environment:
-        POSTGRES_DB: notifications_db
-        POSTGRES_USER: admin
-        POSTGRES_PASSWORD: admin
-      ports:
-        - "5434:5432"
-      volumes:
-        - postgres-notifications-data:/var/lib/postgresql/data
-      networks:
-        - aeroport-network
+  postgres-notifications:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: notifications_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-notifications-data:/var/lib/postgresql/data
+    networks:
+      - aeroport-network
 
-    kafka:
-      image: confluentinc/cp-kafka:7.5.0
-      environment:
-        KAFKA_NODE_ID: 1
-        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-        KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-        KAFKA_PROCESS_ROLES: broker,controller
-        KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-        KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-        CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
-      ports:
-        - "9092:9092"
-      volumes:
-        - kafka-data:/var/lib/kafka/data
-        - kafka-secrets:/etc/kafka/secrets
-      networks:
-        - aeroport-network
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-secrets:/etc/kafka/secrets
+    networks:
+      - aeroport-network
 
   # ============================================
   #              SERVICES SPRING
   # ============================================
 
-    eureka:
-      build:
-        context: ./eureka
-      ports:
-        - "8761:8761"
-      networks:
-        - aeroport-network
-      healthcheck:
-        test: ["CMD", "wget", "-q", "--spider", "http://localhost:8761/actuator/health"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
-        start_period: 60s
+  eureka:
+    build:
+      context: ./eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - aeroport-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
-    gateway:
-      build:
-        context: ./gateway
-      ports:
-        - "8080:8080"
-      environment:
-        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
-      depends_on:
-        eureka:
-          condition: service_healthy
-      networks:
-        - aeroport-network
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    depends_on:
+      eureka:
+        condition: service_healthy
+    networks:
+      - aeroport-network
 
-    service-auth:
-      build:
-        context: ./service-auth
-      ports:
-        - "8081:8081"
-      environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
-        SPRING_DATASOURCE_USERNAME: admin
-        SPRING_DATASOURCE_PASSWORD: admin
-        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
-      depends_on:
-        eureka:
-          condition: service_healthy
-        postgres-auth:
-          condition: service_started
-      networks:
-        - aeroport-network
+  service-auth:
+    build:
+      context: ./service-auth
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    depends_on:
+      eureka:
+        condition: service_healthy
+      postgres-auth:
+        condition: service_started
+    networks:
+      - aeroport-network
 
-    service-vols:
-      build:
-        context: ./service-vols
-      ports:
-        - "8082:8082"
-      environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-vols:5432/vols_db
-        SPRING_DATASOURCE_USERNAME: admin
-        SPRING_DATASOURCE_PASSWORD: admin
-        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
-      depends_on:
-        eureka:
-          condition: service_healthy
-        postgres-vols:
-          condition: service_started
-        kafka:
-          condition: service_started
-      networks:
-        - aeroport-network
+  service-vols:
+    build:
+      context: ./service-vols
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-vols:5432/vols_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    depends_on:
+      eureka:
+        condition: service_healthy
+      postgres-vols:
+        condition: service_started
+      kafka:
+        condition: service_started
+    networks:
+      - aeroport-network
 
-    service-reservations:
-      build:
-        context: ./service-reservations
-      ports:
-        - "8083:8083"
-      environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-reservations:5432/reservations_db
-        SPRING_DATASOURCE_USERNAME: admin
-        SPRING_DATASOURCE_PASSWORD: admin
-        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
-      depends_on:
-        eureka:
-          condition: service_healthy
-        postgres-reservations:
-          condition: service_started
-        kafka:
-          condition: service_started
-      networks:
-        - aeroport-network
+  service-reservations:
+    build:
+      context: ./service-reservations
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-reservations:5432/reservations_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    depends_on:
+      eureka:
+        condition: service_healthy
+      postgres-reservations:
+        condition: service_started
+      kafka:
+        condition: service_started
+    networks:
+      - aeroport-network
 
-    service-notifications:
-      build:
-        context: ./service-notifications
-      ports:
-        - "8084:8084"
-      environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/notifications_db
-        SPRING_DATASOURCE_USERNAME: admin
-        SPRING_DATASOURCE_PASSWORD: admin
-        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
-      depends_on:
-        eureka:
-          condition: service_healthy
-        postgres-notifications:
-          condition: service_started
-        kafka:
-          condition: service_started
-      networks:
-        - aeroport-network
+  service-notifications:
+    build:
+      context: ./service-notifications
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/notifications_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    depends_on:
+      eureka:
+        condition: service_healthy
+      postgres-notifications:
+        condition: service_started
+      kafka:
+        condition: service_started
+    networks:
+      - aeroport-network
 
 # ============================================
 #              VOLUMES & NETWORKS
