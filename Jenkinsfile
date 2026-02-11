@@ -5,11 +5,32 @@ pipeline {
     }
     environment {
         AWS_IP = '51.20.69.79'
+        DOCKER_HUB = 'moboks'
     }
     stages {
         stage('Clone') {
             steps {
                 git branch: 'main', url: 'https://github.com/modibo-26/Aeroport.git'
+            }
+        }
+        stage('Build & Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh "docker-compose build"
+                    sh "docker tag aeroport_eureka ${DOCKER_HUB}/aeroport-eureka:v1"
+                    sh "docker tag aeroport_gateway ${DOCKER_HUB}/aeroport-gateway:v1"
+                    sh "docker tag aeroport_service-auth ${DOCKER_HUB}/aeroport-service-auth:v1"
+                    sh "docker tag aeroport_service-vols ${DOCKER_HUB}/aeroport-service-vols:v1"
+                    sh "docker tag aeroport_service-reservations ${DOCKER_HUB}/aeroport-service-reservations:v1"
+                    sh "docker tag aeroport_service-notifications ${DOCKER_HUB}/aeroport-service-notifications:v1"
+                    sh "docker push ${DOCKER_HUB}/aeroport-eureka:v1"
+                    sh "docker push ${DOCKER_HUB}/aeroport-gateway:v1"
+                    sh "docker push ${DOCKER_HUB}/aeroport-service-auth:v1"
+                    sh "docker push ${DOCKER_HUB}/aeroport-service-vols:v1"
+                    sh "docker push ${DOCKER_HUB}/aeroport-service-reservations:v1"
+                    sh "docker push ${DOCKER_HUB}/aeroport-service-notifications:v1"
+                }
             }
         }
         stage('Deploy') {
