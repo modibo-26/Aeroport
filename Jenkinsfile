@@ -4,7 +4,7 @@ pipeline {
         githubPush()
     }
     environment {
-        AWS_IP = '51.20.69.79'
+        AWS_IP = '13.62.225.210'
         DOCKER_HUB = 'moboks'
     }
     stages {
