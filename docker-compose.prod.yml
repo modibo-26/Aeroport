@@ -205,6 +205,10 @@ services:
     mem_limit: 64m
     ports:
       - "3000:80"
+    depends_on:
+      - gateway
+    networks:
+      - aeroport-network
 
 # ============================================
 #              VOLUMES & NETWORKS
