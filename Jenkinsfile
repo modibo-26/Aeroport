@@ -18,12 +18,12 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                     sh "docker-compose -p aeroport build"
-                    sh "docker tag aeroport_eureka ${DOCKER_HUB}/aeroport-eureka:v1"
-                    sh "docker tag aeroport_gateway ${DOCKER_HUB}/aeroport-gateway:v1"
-                    sh "docker tag aeroport_service-auth ${DOCKER_HUB}/aeroport-service-auth:v1"
-                    sh "docker tag aeroport_service-vols ${DOCKER_HUB}/aeroport-service-vols:v1"
-                    sh "docker tag aeroport_service-reservations ${DOCKER_HUB}/aeroport-service-reservations:v1"
-                    sh "docker tag aeroport_service-notifications ${DOCKER_HUB}/aeroport-service-notifications:v1"
+                    sh "docker tag aeroport-eureka ${DOCKER_HUB}/aeroport-eureka:v1"
+                    sh "docker tag aeroport-gateway ${DOCKER_HUB}/aeroport-gateway:v1"
+                    sh "docker tag aeroport-service-auth ${DOCKER_HUB}/aeroport-service-auth:v1"
+                    sh "docker tag aeroport-service-vols ${DOCKER_HUB}/aeroport-service-vols:v1"
+                    sh "docker tag aeroport-service-reservations ${DOCKER_HUB}/aeroport-service-reservations:v1"
+                    sh "docker tag aeroport-service-notifications ${DOCKER_HUB}/aeroport-service-notifications:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-eureka:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-gateway:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-service-auth:v1"
