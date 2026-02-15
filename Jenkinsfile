@@ -17,7 +17,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker-compose build"
+                    sh "docker-compose -p aeroport build"
                     sh "docker tag aeroport_eureka ${DOCKER_HUB}/aeroport-eureka:v1"
                     sh "docker tag aeroport_gateway ${DOCKER_HUB}/aeroport-gateway:v1"
                     sh "docker tag aeroport_service-auth ${DOCKER_HUB}/aeroport-service-auth:v1"
