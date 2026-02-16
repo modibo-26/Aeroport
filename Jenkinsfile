@@ -36,7 +36,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 sshagent(['aws-ssh-key']) {
-                    sh "scp -o StrictHostKeyChecking=no docker-compose.prod.yml ubuntu@${AWS_IP}:/home/ubuntu/"
+                    sh "scp -o StrictHostKeyChecking=no docker-compose.prod.yml prometheus.yml ubuntu@${AWS_IP}:/home/ubuntu/"
                     sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${AWS_IP} '
                             cd /home/ubuntu &&

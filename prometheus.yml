@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8080']
+
+  - job_name: 'service-auth'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-auth:8081']
+
+  - job_name: 'service-vols'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-vols:8082']
+
+  - job_name: 'service-reservations'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-reservations:8083']
+
+  - job_name: 'service-notifications'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-notifications:8084']

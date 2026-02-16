@@ -55,6 +55,24 @@ services:
     networks:
       - aeroport-network
 
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - aeroport-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - aeroport-network
+
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     environment:
