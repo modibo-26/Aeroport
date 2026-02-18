@@ -220,3 +220,4 @@ volumes:
 networks:
   aeroport-network:
     driver: bridge
+    name: aeroport-network
