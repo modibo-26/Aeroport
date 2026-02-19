@@ -24,12 +24,14 @@ pipeline {
                     sh "docker tag aeroport-service-vols ${DOCKER_HUB}/aeroport-service-vols:v1"
                     sh "docker tag aeroport-service-reservations ${DOCKER_HUB}/aeroport-service-reservations:v1"
                     sh "docker tag aeroport-service-notifications ${DOCKER_HUB}/aeroport-service-notifications:v1"
+                    sh "docker tag aeroport-service-paiement ${DOCKER_HUB}/aeroport-service-paiement:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-eureka:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-gateway:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-service-auth:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-service-vols:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-service-reservations:v1"
                     sh "docker push ${DOCKER_HUB}/aeroport-service-notifications:v1"
+                    sh "docker push ${DOCKER_HUB}/aeroport-service-paiement:v1"
                 }
             }
         }
