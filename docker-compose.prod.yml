@@ -224,6 +224,8 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_SUCCESS_URL: ${FRONTEND_URL}/paiement/success?session_id={CHECKOUT_SESSION_ID}
+      STRIPE_CANCEL_URL: ${FRONTEND_URL}/paiement/cancel
     ports:
       - "8085:8085"
     depends_on:
