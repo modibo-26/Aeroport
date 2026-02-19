@@ -283,4 +283,5 @@ volumes:
 
 networks:
   aeroport-network:
+    name: aeroport-network
     driver: bridge
