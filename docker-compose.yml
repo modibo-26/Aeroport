@@ -55,6 +55,19 @@ services:
     networks:
       - aeroport-network
 
+  postgres-paiement:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: paiement_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-paiement-data:/var/lib/postgresql/data
+    networks:
+      - aeroport-network
+
   prometheus:
     image: prom/prometheus
     ports:
@@ -184,6 +197,29 @@ services:
     networks:
       - aeroport-network
 
+  service-paiement:
+    build:
+      context: ./service-paiement
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-paiement:5432/paiement_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_XXXXXXX}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_XXXXXXX}
+    depends_on:
+      eureka:
+        condition: service_healthy
+      postgres-paiement:
+        condition: service_started
+      kafka:
+        condition: service_started
+    networks:
+      - aeroport-network
+
   service-notifications:
     build:
       context: ./service-notifications
@@ -213,6 +249,7 @@ volumes:
   postgres-auth-data:
   postgres-vols-data:
   postgres-reservations-data:
+  postgres-paiement-data:
   postgres-notifications-data:
   kafka-data:
   kafka-secrets:

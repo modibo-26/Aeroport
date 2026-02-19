@@ -26,7 +26,7 @@ public class ReservationController {
 
     @PutMapping("/{id}/annuler")
     public Reservation annulerReservation(@PathVariable Long id){
-        return service.annulerReservation(id);
+        return service.annulerReservation(id, "PASSAGER");
     }
 
     @GetMapping("/passager/{passagerId}")

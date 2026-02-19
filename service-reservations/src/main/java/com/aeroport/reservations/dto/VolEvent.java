@@ -7,11 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReservationEvent {
-    private Long reservationId;
+public class VolEvent {
     private Long volId;
-    private Long passagerId;
     private String type;
-    private String source;
     private String message;
 }

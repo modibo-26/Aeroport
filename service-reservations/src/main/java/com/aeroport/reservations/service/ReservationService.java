@@ -35,7 +35,7 @@ public class ReservationService implements IReservationService {
 
         volClient.removePlaces(reservation.getVolId(), reservation.getNombrePlaces());
 
-        kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "CRÉATION", "Réservation créé"));
+        kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "CRÉATION", "PASSAGER", "Réservation créé"));
 
         return saved;
     }
@@ -46,14 +46,14 @@ public class ReservationService implements IReservationService {
     }
 
     @Override
-    public Reservation annulerReservation(Long id) {
+    public Reservation annulerReservation(Long id, String source) {
         Reservation reservation = findById(id);
         reservation.setStatut(Statut.ANNULEE);
         Reservation saved = repository.save(reservation);
 
         volClient.addPlaces(reservation.getVolId(), reservation.getNombrePlaces());
 
-        kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "ANNULATION", "Réservation annulée"));
+        kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "ANNULATION", source, "Réservation annulée"));
 
         return saved;
     }
@@ -69,7 +69,7 @@ public class ReservationService implements IReservationService {
         reservation.setStatut(Statut.CONFIRMEE);
         Reservation saved = repository.save(reservation);
 
-        kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "CONFIRMATION", "Réservation confirmeée"));
+        kafka.send("reservation-events", new ReservationEvent(saved.getId(), saved.getVolId(), saved.getPassagerId(), "CONFIRMATION", "PASSAGER", "Réservation confirmée"));
 
         return saved;
     }

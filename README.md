@@ -18,24 +18,25 @@ Système de gestion aéroportuaire basé sur une architecture microservices Spri
                       │   port 8761    │
                       └───────┬────────┘
                               │
-        ┌─────────┬───────────┼───────────┬──────────┐
-        ▼         ▼           ▼           ▼          ▼
-   service-   service-   service-    service-     Kafka
-     auth       vols    reservations notifications (async)
-   :8081      :8082       :8083       :8084      :9092
-     │          │           │           │
-     ▼          ▼           ▼           ▼
-   PostgreSQL PostgreSQL PostgreSQL  PostgreSQL
-   :5431      :5432       :5433       :5434
+        ┌─────────┬───────────┼───────────┬──────────┬──────────┐
+        ▼         ▼           ▼           ▼          ▼          ▼
+   service-   service-   service-    service-    service-    Kafka
+     auth       vols    reservations notifications paiement  (async)
+   :8081      :8082       :8083       :8084       :8085     :9092
+     │          │           │           │           │
+     ▼          ▼           ▼           ▼           ▼
+   PostgreSQL PostgreSQL PostgreSQL  PostgreSQL  PostgreSQL
+   :5431      :5432       :5433       :5434       :5435
 ```
 
 ## Stack technique
 
-- **Java 21** + **Spring Boot 3.5**
-- **Spring Cloud** (Eureka, Gateway, OpenFeign)
+- **Java 17** + **Spring Boot 4.0.2**
+- **Spring Cloud 2025.1.0** (Eureka, Gateway, OpenFeign)
 - **Spring Security** + **JWT** (dans service-auth et Gateway)
 - **PostgreSQL 15** (une base par microservice)
 - **Apache Kafka** (communication asynchrone)
+- **Stripe** (paiement en ligne via Checkout Sessions)
 - **Docker Compose** (infrastructure + services)
 - **Lombok** + **Maven**
 
@@ -65,7 +66,7 @@ docker-compose up -d --build
 
 - Eureka Dashboard : http://localhost:8761
 - API Gateway : http://localhost:8080
-- Tous les services doivent être enregistrés (5 services)
+- Tous les services doivent être enregistrés (6 services)
 
 ---
 
@@ -81,6 +82,7 @@ Les images sont disponibles publiquement :
 | Vols | `moboks/aeroport-service-vols:v1` |
 | Reservations | `moboks/aeroport-service-reservations:v1` |
 | Notifications | `moboks/aeroport-service-notifications:v1` |
+| Paiement | `moboks/aeroport-service-paiement:v1` |
 
 ---
 
@@ -106,6 +108,7 @@ Point d'entrée unique. Responsabilités :
 | `/vols/**` | SERVICE-VOLS |
 | `/reservations/**` | SERVICE-RESERVATIONS |
 | `/notifications/**` | SERVICE-NOTIFICATIONS |
+| `/paiements/**` | SERVICE-PAIEMENT |
 
 ### Service Auth (port 8081)
 
@@ -169,8 +172,9 @@ Gestion des réservations avec vérification des places disponibles via Feign.
 **Communication :**
 - **Feign Client** vers SERVICE-VOLS pour vérifier les places disponibles avant réservation
 - **Feign Client** vers SERVICE-VOLS pour incrémenter/décrémenter places lors de la confirmation/annulation
-- **Kafka Producer** : Publie sur `reservation-events` lors de la création, confirmation et annulation
+- **Kafka Producer** : Publie sur `reservation-events` lors de la création, confirmation et annulation (avec champ `source` : PASSAGER ou VOL)
 - **Kafka Consumer** : Écoute `vol-events` pour annuler automatiquement les réservations si un vol est annulé
+- **Kafka Consumer** : Écoute `paiement-events` pour confirmer la réservation après paiement
 
 ### Service Notifications (port 8084)
 
@@ -189,6 +193,34 @@ Notifications aux passagers, alimenté par Kafka.
 | DELETE | `/notifications/{id}` | Authentifié | Supprimer |
 
 **Kafka Consumer :** Écoute les topics `vol-events` et `reservation-events` pour créer automatiquement des notifications.
+- Ignore les `reservation-events` avec `source=VOL` (la notification vient déjà de `vol-events`)
+
+### Service Paiement (port 8085)
+
+Gestion des paiements via Stripe Checkout Sessions.
+
+**Entités :** `Paiement` (id, reservationId, passagerId, montant, stripeSessionId, stripePaymentIntentId, statut, createdAt)
+
+**Enum StatutPaiement :** `EN_ATTENTE`, `PAYEE`, `ECHOUEE`, `REMBOURSEE`
+
+**Endpoints :**
+
+| Méthode | URL | Accès | Description |
+|---------|-----|-------|-------------|
+| POST | `/paiements?reservationId=&passagerId=&montant=` | Authentifié | Créer une session Stripe |
+| POST | `/paiements/webhook` | Public | Webhook Stripe |
+| POST | `/paiements/{id}/rembourser` | Admin | Rembourser un paiement |
+| GET | `/paiements/reservation/{reservationId}` | Authentifié | Paiement d'une réservation |
+| GET | `/paiements/{id}` | Authentifié | Détail d'un paiement |
+
+**Stripe :**
+- Crée une Checkout Session et retourne l'URL de paiement
+- Le webhook écoute `checkout.session.completed` (confirme) et `checkout.session.expired` (échec)
+- Garde anti-doublons : empêche de créer un paiement si un EN_ATTENTE ou PAYEE existe déjà
+
+**Communication :**
+- **Kafka Producer** : Publie sur `paiement-events` lors de la confirmation et du remboursement manuel
+- **Kafka Consumer** : Écoute `reservation-events` pour rembourser silencieusement lors d'une annulation
 
 ---
 
@@ -205,16 +237,20 @@ Service Réservations ──► Service Vols
 ### Asynchrone (Kafka)
 
 ```
-Service Vols ──────────► vol-events ──────────┐
-                                              ├──► Service Notifications
-Service Réservations ──► reservation-events ──┘
-                                              └──► Service Réservations
-                                                   (annulation auto si vol annulé)
+Service Vols ──────────► vol-events ──────────┬──► Service Notifications (notif passagers)
+                                              └──► Service Réservations (annulation auto)
+
+Service Réservations ──► reservation-events ──┬──► Service Notifications (sauf source=VOL)
+                                              └──► Service Paiement (remboursement silencieux)
+
+Service Paiement ──────► paiement-events ─────┬──► Service Reservations (confirmation résa)
+                                              └──► (extensible)
 ```
 
 **Topics Kafka :**
 - `vol-events` : événements liés aux vols (modification, retard, annulation)
-- `reservation-events` : événements liés aux réservations (création, confirmation, annulation)
+- `reservation-events` : événements liés aux réservations (création, confirmation, annulation) — contient un champ `source` (PASSAGER/VOL)
+- `paiement-events` : événements liés aux paiements (confirmation, remboursement)
 
 ---
 
@@ -237,6 +273,7 @@ Les services métier ne valident pas le JWT — ils font confiance au Gateway.
 
 - `POST /auth/**` (login, register)
 - `GET /vols/**` (consultation)
+- `POST /paiements/webhook` (webhook Stripe)
 
 ### Routes protégées
 

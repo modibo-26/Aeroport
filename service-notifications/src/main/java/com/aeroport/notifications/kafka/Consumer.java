@@ -28,6 +28,11 @@ public class Consumer {
     public void consumeReservation(String message) throws Exception{
         ObjectMapper mapper = new ObjectMapper();
         ReservationEvent event = mapper.readValue(message, ReservationEvent.class);
+
+        if ("ANNULATION".equals(event.getType()) && "VOL".equals(event.getSource())) {
+            return;
+        }
+
         Notification notification = Notification.builder()
                 .passagerId(event.getPassagerId())
                 .volId(event.getVolId())

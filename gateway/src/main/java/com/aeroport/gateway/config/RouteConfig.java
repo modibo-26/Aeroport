@@ -43,4 +43,12 @@ public class RouteConfig {
                 .filter(lb("SERVICE-NOTIFICATIONS"))
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> paiementRoute() {
+        return route("paiement-service")
+                .route(path("/paiements").or(path("/paiements/**")), http())
+                .filter(lb("SERVICE-PAIEMENT"))
+                .build();
+    }
 }

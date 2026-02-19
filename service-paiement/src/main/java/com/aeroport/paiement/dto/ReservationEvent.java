@@ -1,4 +1,4 @@
-package com.aeroport.reservations.dto;
+package com.aeroport.paiement.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -70,7 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private Boolean isPublic(String path, String method) {
-        return path.startsWith("/auth/") || path.startsWith("/vols") && method.equals("GET") || path.startsWith("/actuator/");
+        return path.startsWith("/auth/") || path.startsWith("/vols") && method.equals("GET") || path.startsWith("/actuator/") || path.startsWith("/paiements/webhook");
     }
 
     private Boolean isAdmin(String path, String method) {

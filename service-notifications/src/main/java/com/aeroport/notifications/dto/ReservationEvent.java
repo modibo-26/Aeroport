@@ -12,5 +12,6 @@ public class ReservationEvent {
     private Long volId;
     private Long passagerId;
     private String type;
+    private String source;
     private String message;
 }
