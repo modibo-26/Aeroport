@@ -57,6 +57,7 @@ public class PaiementService implements IPaiementService {
                 .reservationId(reservationId)
                 .passagerId(passagerId)
                 .montant(montant)
+                .email(email)
                 .stripeSessionId(session.getId())
                 .statut(StatutPaiement.EN_ATTENTE)
                 .build();
@@ -75,7 +76,7 @@ public class PaiementService implements IPaiementService {
         paiement.setStatut(StatutPaiement.PAYEE);
         Paiement saved = repository.save(paiement);
 
-        kafka.send("paiement-events", new PaiementEvent(saved.getId(), saved.getReservationId(), saved.getPassagerId(), "PAIEMENT", "Paiement confirmé"));
+        kafka.send("paiement-events", new PaiementEvent(saved.getId(), saved.getReservationId(), saved.getPassagerId(), "PAIEMENT", "Paiement confirmé", saved.getEmail()));
 
         return saved;
     }
@@ -90,7 +91,7 @@ public class PaiementService implements IPaiementService {
         paiement.setStatut(StatutPaiement.REMBOURSEE);
         Paiement saved = repository.save(paiement);
 
-        kafka.send("paiement-events", new PaiementEvent(saved.getId(), saved.getReservationId(), saved.getPassagerId(), "REMBOURSEMENT", "Paiement remboursé"));
+        kafka.send("paiement-events", new PaiementEvent(saved.getId(), saved.getReservationId(), saved.getPassagerId(), "REMBOURSEMENT", "Paiement remboursé", saved.getEmail()));
 
         return saved;
     }

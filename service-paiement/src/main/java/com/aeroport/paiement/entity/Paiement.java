@@ -31,6 +31,8 @@ public class Paiement {
         @Column(nullable = false)
         private BigDecimal montant;
 
+        private String email;
+
         private String stripeSessionId;
 
         private String stripePaymentIntentId;
