@@ -43,7 +43,7 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ubuntu@${AWS_IP} '
                             cd /home/ubuntu &&
                             docker-compose -f docker-compose.prod.yml pull &&
-                            docker-compose -f docker-compose.prod.yml down &&
+                            docker-compose -f docker-compose.prod.yml down --remove-orphans &&
                             docker-compose -f docker-compose.prod.yml up -d
                         '
                     """
