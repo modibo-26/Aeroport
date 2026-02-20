@@ -26,7 +26,7 @@ public class PaiementService implements IPaiementService {
     private final KafkaTemplate<String, PaiementEvent> kafka;
 
     @Override
-    public String creerSessionPaiement(Long reservationId, Long passagerId, BigDecimal montant) throws StripeException {
+    public String creerSessionPaiement(String email, Long reservationId, Long passagerId, BigDecimal montant) throws StripeException {
         repository.findByReservationId(reservationId).ifPresent(existing -> {
             if (existing.getStatut() == StatutPaiement.PAYEE) {
                 throw new RuntimeException("Réservation déjà payée #" + reservationId);
@@ -35,9 +35,10 @@ public class PaiementService implements IPaiementService {
         });
 
         SessionCreateParams params = SessionCreateParams.builder()
-                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(stripe.getSuccessUrl())
                 .setCancelUrl(stripe.getCancelUrl())
+                .setCustomerEmail(email)
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
                         .setPriceData(SessionCreateParams.LineItem.PriceData.builder()

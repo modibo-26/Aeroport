@@ -29,10 +29,11 @@ public class PaiementController {
 
     @PostMapping
     public ResponseEntity<String> creerSession(
+            @RequestHeader("X-User-Email")  String email,
             @RequestParam Long reservationId,
             @RequestParam Long passagerId,
             @RequestParam BigDecimal montant) throws StripeException {
-        String url = service.creerSessionPaiement(reservationId, passagerId, montant);
+        String url = service.creerSessionPaiement(email, reservationId, passagerId, montant);
         return ResponseEntity.ok(url);
     }
 

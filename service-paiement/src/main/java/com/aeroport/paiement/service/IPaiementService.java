@@ -7,7 +7,7 @@ import com.stripe.exception.StripeException;
 import java.math.BigDecimal;
 
 public interface IPaiementService {
-    String creerSessionPaiement(Long reservationId, Long passagerId, BigDecimal montant) throws StripeException;
+    String creerSessionPaiement(String email,Long reservationId, Long passagerId, BigDecimal montant) throws StripeException;
     Paiement confirmerPaiement(String stripeSessionId) throws StripeException;
     Paiement rembourser(Long paiementId) throws StripeException;
     Paiement rembourserParReservation(Long reservationId) throws StripeException;

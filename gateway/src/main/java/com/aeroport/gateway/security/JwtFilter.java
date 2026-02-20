@@ -3,6 +3,7 @@ package com.aeroport.gateway.security;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -65,6 +66,18 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
+
+        String email = service.getEmail(token);
+        String role = service.getRole(token);
+
+        HttpServletRequestWrapper wrappedRequest = new HttpServletRequestWrapper(request) {
+            @Override
+            public String getHeader(String name) {
+                if ("X-User-Email".equals(name)) return email;
+                if ("X-User-Role".equals(name)) return role;
+                return super.getHeader(name);
+            }
+        };
 
         filterChain.doFilter(request, response);
     }
