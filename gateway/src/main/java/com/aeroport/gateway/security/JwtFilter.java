@@ -79,7 +79,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         };
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(wrappedRequest, response);
     }
 
     private Boolean isPublic(String path, String method) {
