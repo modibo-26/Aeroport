@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -76,6 +76,21 @@ public class JwtFilter extends OncePerRequestFilter {
                 if ("X-User-Email".equals(name)) return email;
                 if ("X-User-Role".equals(name)) return role;
                 return super.getHeader(name);
+            }
+
+            @Override
+            public Enumeration<String> getHeaders(String name) {
+                if ("X-User-Email".equals(name)) return Collections.enumeration(List.of(email));
+                if ("X-User-Role".equals(name)) return Collections.enumeration(List.of(role));
+                return super.getHeaders(name);
+            }
+
+            @Override
+            public Enumeration<String> getHeaderNames() {
+                List<String> names = Collections.list(super.getHeaderNames());
+                names.add("X-User-Email");
+                names.add("X-User-Role");
+                return Collections.enumeration(names);
             }
         };
 
