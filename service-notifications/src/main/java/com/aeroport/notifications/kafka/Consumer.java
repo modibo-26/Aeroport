@@ -59,7 +59,7 @@ public class Consumer {
             emailService.envoyerEmail(event.getEmail(),
                     "Confirmation de paiement - Réservation #" + event.getReservationId(),
                     "Votre paiement a été confirmé pour la réservation #" + event.getReservationId() + ".\nMerci pour votre achat !");
-        } else if ("REMBOURSEMENT".equals(event.getType())) {
+        } else if ("REMBOURSEMENT".equals(event.getType()) || "REMBOURSEMENT_RESERVATION".equals(event.getType())) {
             emailService.envoyerEmail(event.getEmail(),
                     "Remboursement effectué - Réservation #" + event.getReservationId(),
                     "Votre remboursement a été effectué pour la réservation #" + event.getReservationId() + ".\nLe montant sera crédité sous quelques jours.");

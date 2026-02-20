@@ -112,7 +112,11 @@ public class PaiementService implements IPaiementService {
                 .build();
         Refund.create(params);
         paiement.setStatut(StatutPaiement.REMBOURSEE);
-        return repository.save(paiement);
+        Paiement saved = repository.save(paiement);
+
+        kafka.send("paiement-events", new PaiementEvent(saved.getId(), saved.getReservationId(), saved.getPassagerId(), "REMBOURSEMENT_RESERVATION", "Paiement remboursé", saved.getEmail()));
+
+        return saved;
     }
 
     @Override

@@ -37,6 +37,7 @@ Système de gestion aéroportuaire basé sur une architecture microservices Spri
 - **PostgreSQL 15** (une base par microservice)
 - **Apache Kafka** (communication asynchrone)
 - **Stripe** (paiement en ligne via Checkout Sessions)
+- **JavaMailSender** (emails via SMTP Gmail)
 - **Docker Compose** (infrastructure + services)
 - **Lombok** + **Maven**
 
@@ -192,14 +193,17 @@ Notifications aux passagers, alimenté par Kafka.
 | PUT | `/notifications/{id}/lue` | Authentifié | Marquer comme lue |
 | DELETE | `/notifications/{id}` | Authentifié | Supprimer |
 
-**Kafka Consumer :** Écoute les topics `vol-events` et `reservation-events` pour créer automatiquement des notifications.
+**Kafka Consumer :** Écoute les topics `vol-events`, `reservation-events` et `paiement-events` pour créer automatiquement des notifications.
 - Ignore les `reservation-events` avec `source=VOL` (la notification vient déjà de `vol-events`)
+- Écoute `paiement-events` : envoie un email de confirmation (type=PAIEMENT) ou de remboursement (type=REMBOURSEMENT) au passager via SMTP Gmail
+
+**Email :** Utilise `JavaMailSender` (Spring Boot Mail) avec SMTP Gmail. Config via variables d'env `MAIL_USERNAME` et `MAIL_PASSWORD`.
 
 ### Service Paiement (port 8085)
 
 Gestion des paiements via Stripe Checkout Sessions.
 
-**Entités :** `Paiement` (id, reservationId, passagerId, montant, stripeSessionId, stripePaymentIntentId, statut, createdAt)
+**Entités :** `Paiement` (id, reservationId, passagerId, montant, email, stripeSessionId, stripePaymentIntentId, statut, createdAt)
 
 **Enum StatutPaiement :** `EN_ATTENTE`, `PAYEE`, `ECHOUEE`, `REMBOURSEE`
 
@@ -244,7 +248,7 @@ Service Réservations ──► reservation-events ──┬──► Service No
                                               └──► Service Paiement (remboursement silencieux)
 
 Service Paiement ──────► paiement-events ─────┬──► Service Reservations (confirmation résa)
-                                              └──► (extensible)
+                                              └──► Service Notifications (email confirmation/remboursement)
 ```
 
 **Topics Kafka :**
